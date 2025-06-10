@@ -1,72 +1,115 @@
-# Prueba de Capacidades en Gestión y Gobierno de Datos - POC
 
-Este repositorio contiene la Prueba de Concepto (POC) para la plataforma de analítica de datos, desarrollada como parte del Ejercicio #4 de la evaluación.
+# POC para la SB
 
-## Arquitectura
+Este repositorio presenta una Prueba de Concepto (POC) para la plataforma de analítica y reportería de datos de la Superintendencia de Bancos (SB), diseñada para mejorar la calidad y el consumo de la reportería regulatoria.
 
-La solución está construida con microservicios en contenedores Docker, orquestados por Docker Compose. Utiliza PostgreSQL como el motor de base de datos centralizado para todas las capas de datos (staging, curado, OLAP) y para los metadatos de los servicios.
+---
 
-**Servicios:**
+## Estructura y Servicios del Proyecto
 
-- **Ingestion Service:** Responsable de extraer datos de la API de Alpha Vantage.
-- **Orchestration Service (Apache Airflow):** Gestiona y programa los flujos de trabajo de datos.
-- **PostgreSQL DB:** Almacena todos los datos (crudos, validados, transformados) y metadatos.
-- **Data Quality Service:** Realiza validaciones sobre los datos extraídos.
-- **Transformation Service (DBT):** Transforma y agrega los datos para el consumo analítico.
-- **Reporting Service (Apache Superset):** Provee visualizaciones dinámicas de los datos.
-- **Catalog Service (OpenMetadata/DataHub):** Cataloga los activos de información.
+La POC se compone de varios servicios Docker interconectados:
 
-## Cómo Ejecutar la Plataforma (POC)
+### 1. `postgres_db`
+    * **Función**: Almacena todos los datos del pipeline: raw data, datos en área de staging, y las tablas de resumen. Es la unica fuente de informacion para los datos analíticos.
 
-**Requisitos Previos:**
+### 2. `airflow` - `webserver` & `scheduler`
+    * **Función**: Airflow orquesta el flujo de datos completo, desde la ingesta hasta la generación de resúmenes y catalogación. Permite definir la secuencia de ejecución de cada paso (ingesta, staging, validación, transformación, visualización).
 
-- Docker y Docker Compose instalados.
-- Una clave API de Alpha Vantage (se configurará en el archivo `.env`).
+### 3. `ingestion_service` (Servicio de Ingesta)
+    * **Función**: Se encarga de la **conexión con la API de Alpha Vantage** y la extracción de los sets de datos requeridos (Company Overview, Income Statement, Balance Sheet, Cash Flow). Los datos se colocan inicialmente en el área de staging en `postgres_db`.
 
-**Pasos:**
+### 4. `data_quality_service` (Servicio de Calidad de Datos)
+    * **Función**: Ejecuta **validaciones de calidad de datos** utilizando Great Expectations sobre los datos en el área de staging y/o después de las transformaciones, asegurando que los datos cumplen con las características esperadas.
 
-1.  **Clonar el Repositorio:**
+### 5. `transformation_service` (Servicio de Transformación)
+    * **Función**: Utiliza dbt para **generar tablas de resúmenes anuales** y otras transformaciones necesarias a partir de los datos en `postgres_db`, aplicando reglas de negocio y optimizando la estructura para el análisis.
 
-    ```bash
-    git clone <URL_DEL_REPOSITORIO>
-    cd project_root
+### 6. `superset_app` (Servicio de Reportes y Visualización)
+    * **Función**: Proporciona la **interfaz de usuario para la exploración y visualización de datos**, conectándose a las tablas de resumen en `postgres_db`. Permite crear visualizaciones dinámicas que proveen información de relevancia para las áreas que explotan la información.
+---
+
+## Estrategias 
+
+Se han considerado las siguientes estrategias para garantizar un alto rendimiento, escalabilidad y tolerancia a fallos:
+
+* **Capas (Layers)**:
+    * **Capa de Ingesta/Staging**: Los datos crudos se ingieren y se colocan en un área de staging dedicada en `postgres_db` (tablas crudas o temporales), manteniendo la fidelidad del origen.
+    * **Capa de Calidad**: Se ejecutan validaciones en la capa de staging para identificar y gestionar discrepancias antes de la transformación.
+    * **Capa de Transformación/Modelado**: dbt crea modelos de datos limpios y agregados (como las tablas de resumen anuales) optimizados para el consumo analítico.
+* **Splits (División de Responsabilidades)**:
+    * Cada servicio está **encapsulado en un contenedor separado** con una responsabilidad única (ingesta, orquestación, calidad, transformación, reporting). Esto facilita el desarrollo, despliegue y escalado independiente de cada componente.
+* **Estructuras de Datos**:
+    * Se utilizan esquemas de tablas bien definidos en `postgres_db` para cada capa para asegurar la integridad y la eficiencia de las consultas.
+    * Las tablas de resumen se diseñan para el consumo utilizando Superset.
+* **Rendimiento y Escalabilidad**:
+    * Uso de bases de datos relacionales optimizadas (PostgreSQL).
+    * Utilización de dbt para transformaciones eficientes y modulares.
+
+
+---
+
+## Cómo Ejecutar Esta Prueba de Concepto (POC)
+
+### Requisitos Previos
+
+* **Docker Desktop**: Asegúrate de que Docker Desktop esté instalado y en ejecución en tu sistema.
+* **Archivo `.env`**: Crea un archivo `.env` en la **raíz de tu directorio de proyecto** con las siguientes variables de entorno. Estas variables son cruciales para la conectividad entre los servicios y la API externa[cite: 53]:
+    ```dotenv
+    POSTGRES_USER=your_postgres_user
+    POSTGRES_PASSWORD=your_postgres_password
+    POSTGRES_DB=your_database_name
+    ALPHA_VANTAGE_API_KEY=tu_alpha_vantage_api_key_aqui # Obtener de Alpha Vantage
+    SUPERSET_SECRET_KEY=una_clave_secreta_muy_larga_y_unica_que_debes_cambiar
     ```
 
-2.  **Configurar Variables de Entorno:**
-    Copia el archivo `.env.example` (si existe) a `.env` y edita las variables necesarias, especialmente la clave API de Alpha Vantage y las credenciales de PostgreSQL.
+### Pasos
 
+1.  **Clona el repositorio**:
     ```bash
-    cp .env.example .env
-    # Abre .env y añade/modifica:
-    # ALPHA_VANTAGE_API_KEY=TU_API_KEY
-    # POSTGRES_USER=your_user
-    # POSTGRES_PASSWORD=your_password
-    # POSTGRES_DB=your_database
+    git clone <url-de-tu-repositorio-github>
+    cd <nombre-de-tu-repositorio>
     ```
-
-3.  **Construir y Levantar los Servicios Docker:**
-
+3.  **Construye y levanta los servicios Docker**:
     ```bash
-    docker-compose build
-    docker-compose up -d
+    docker-compose up --build -d
     ```
+    * Este comando construirá las imágenes Docker para `airflow_webserver`, `airflow_scheduler`, `ingestion_service`, `data_quality_service`, `transformation_service` y `superset_app`, y luego iniciará todos los contenedores en modo `detached` (segundo plano).
 
-    Esto construirá las imágenes de Docker y levantará todos los servicios en segundo plano.
+4.  **Verifica que los servicios estén en ejecución y saludables**:
+    ```bash
+    docker-compose ps
+    ```
+    * Todos los servicios listados deben mostrar un estado `healthy` o `running` una vez que se hayan inicializado correctamente. 
 
-4.  **Acceder a los Servicios:**
+### Acceso a las Interfaces de Usuario
 
-    - **Apache Airflow UI:** `http://localhost:8080` (usar `airflow` / `airflow` como usuario/contraseña por defecto).
-    - **Apache Superset UI:** `http://localhost:8088` (consultar los logs para el usuario/contraseña inicial de Superset).
-    - **OpenMetadata/DataHub UI:** (Si se implementa) `http://localhost:<PUERTO_DEL_CATALOGO>`
+* **Interfaz de Usuario de Apache Airflow**:
+    * Abre tu navegador y navega a `http://localhost:8080`.
+    * **Primer inicio**: Es probable que necesites crear un usuario administrador en Airflow. Esto se puede hacer ejecutando un comando Docker una vez que el `airflow_webserver` esté en marcha:
+        ```bash
+        docker-compose exec airflow_webserver airflow users create \
+            --username admin --firstname Admin --lastname User --role Admin \
+            --email admin@example.com -p your_admin_password
+        ```
+* **Interfaz de Usuario de Apache Superset**:
+    * Abre tu navegador y navega a `http://localhost:8088`.
+    * **Primer inicio**: Superset requiere una inicialización. El `entrypoint` del servicio `superset_app` (`/app/docker-init.sh`) está diseñado para manejar esto, que típicamente incluye:
+        * Configurar la base de datos de metadatos de Superset.
+        * Crear un usuario administrador (si no existe).
+        * Cargar conjuntos de datos y dashboards de ejemplo (opcional, pero útil para una POC).
+        * Asegúrate de que este script `docker-init.sh` en el directorio `reporting_service` esté correctamente configurado para estos pasos. Por ejemplo:
+            ```bash
+            #!/bin/bash
+            superset db upgrade
+            superset fab create-admin --username admin --firstname Superset --lastname Admin --email admin@superset.com --password admin
+            superset load_examples
+            superset init
+            ```
+---
 
-5.  **Ejecutar el Pipeline de Datos:**
+## Consideraciones Adicionales y Futuras Extensiones
 
-    - En la UI de Airflow, habilita y activa el DAG `alpha_vantage_dag.py`. Este DAG orquestará la extracción, validación y transformación de los datos.
+* **Monitoreo y logging centralizado**: Implementar una solución de logging centralizado y monitoreo de métricas para todos los servicios.
+* **Alertas**: Configurar sistemas de alerta para fallos en los DAGs de Airflow o problemas de calidad de datos.
+* **CI/CD**: Integrar el pipeline en un flujo de CI/CD para automatizar pruebas y despliegues.
 
-6.  **Explorar Datos y Visualizaciones:**
-    - Una vez que el DAG haya completado su ejecución, accede a Superset para explorar las visualizaciones de los datos transformados.
-    - Puedes conectarte a la base de datos PostgreSQL (host: `postgres_db`, puerto: `5432`) desde un cliente SQL para inspeccionar las tablas en los diferentes esquemas (`raw`, `validated`, `curated`, `olap`).
-
-## Contacto
-
-Para cualquier consulta o retroalimentación, contactar a [Tu Nombre/Correo].
