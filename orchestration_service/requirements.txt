@@ -1,0 +1,4 @@
+apache-airflow==2.7.2
+apache-airflow[postgres] # Para el backend de Airflow con PostgreSQL
+psycopg2-binary          # Asegurar que psycopg2 está disponible
+apache-airflow-providers-docker # Para poder ejecutar tareas en Docker si se desea

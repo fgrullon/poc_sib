@@ -1,0 +1,51 @@
+config_version: 3
+datasources:
+  my_postgres_datasource:
+    class_name: SimpleSqlalchemyDatasource
+    module_name: great_expectations.datasource.simple_sqlalchemy_datasource
+    connection_string: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/${POSTGRES_DB}
+expectations_store_name: expectations_store
+validations_store_name: validations_store
+evaluation_parameter_store_name: evaluation_parameter_store
+checkpoint_store_name: checkpoint_store
+data_docs_sites:
+  local_site:
+    class_name: SiteBuilder
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: /app/great_expectations/uncommitted/data_docs/local_site
+    site_section_order:
+      - data_asset
+      - expectation_suite
+      - rendered_data_doc
+plugins_directory: plugins
+stores:
+  expectations_store:
+    class_name: ExpectationsStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: /app/great_expectations/expectations/
+  validations_store:
+    class_name: ValidationsStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: /app/great_expectations/uncommitted/validations/
+  evaluation_parameter_store:
+    class_name: EvaluationParameterStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: /app/great_expectations/uncommitted/data_quality/evaluation_parameters/
+  checkpoint_store:
+    class_name: CheckpointStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: /app/great_expectations/checkpoints/
+anonymous_usage_statistics:
+  data_context_id: e60b25b2-d883-494d-9523-9e059e25f6c3
+  enabled: true
+notebooks:
+config_variables_file_path:
+include_rendered_content:
+  globally: false
+  expectation_suite: false
+  expectation_validation_result: false

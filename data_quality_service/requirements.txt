@@ -1,0 +1,8 @@
+great_expectations==0.18.1
+psycopg2-binary
+pandas
+python-dotenv
+Jinja2==2.11.3
+Werkzeug==2.1.2
+MarkupSafe==2.0.1
+sqlalchemy

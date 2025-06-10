@@ -1,0 +1,115 @@
+CREATE SCHEMA IF NOT EXISTS raw_data;
+
+DROP TABLE IF EXISTS raw_data.company_overview CASCADE;
+
+CREATE TABLE IF NOT EXISTS raw_data.company_overview (
+ symbol VARCHAR(50) PRIMARY KEY,
+ assettype VARCHAR(255),
+ name TEXT,
+ description TEXT,
+ cik VARCHAR(50),
+ exchange VARCHAR(50),
+ currency VARCHAR(10),
+ country VARCHAR(50),
+ sector VARCHAR(255),
+ industry VARCHAR(255),
+ address TEXT,
+ officialsite TEXT,
+ fiscalyearend VARCHAR(50),
+ latestquarter VARCHAR(50),
+ marketcapitalization NUMERIC,
+ ebitda NUMERIC,
+ peratio NUMERIC,  
+ pegratio NUMERIC, 
+ bookvalue NUMERIC,
+ dividendpershare NUMERIC, 
+ dividendyield NUMERIC, 
+ eps NUMERIC,
+ revenuepersharettm NUMERIC,  
+ profitmargin NUMERIC,  
+ operatingmarginttm NUMERIC,  
+ returnonassetsttm NUMERIC,
+ returnonequityttm NUMERIC,
+ revenuettm NUMERIC, 
+ grossprofitttm NUMERIC,
+ dilutedepsttm NUMERIC, 
+ quarterlyearningsgrowthyoy NUMERIC,
+ quarterlyrevenuegrowthyoy NUMERIC,
+ analysttargetprice NUMERIC,  
+ trailingpe NUMERIC, 
+ forwardpe NUMERIC,
+ pricetosalesratiottm NUMERIC,
+ pricetobookratio NUMERIC, 
+ evtorevenue NUMERIC,
+ evtoebitda NUMERIC, 
+ analystratingstrongbuy NUMERIC,
+ analystratingbuy NUMERIC,
+ analystratinghold NUMERIC,
+ analystratingsell NUMERIC,
+ analystratingstrongsell NUMERIC,
+ beta NUMERIC,  
+ _52weekhigh NUMERIC,
+ _52weeklow NUMERIC, 
+ _50daymovingaverage NUMERIC,
+ _200daymovingaverage NUMERIC,
+ sharesoutstanding NUMERIC,
+ dividenddate DATE,
+ exdividenddate DATE,
+ _load_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+DROP TABLE IF EXISTS raw_data.income_statement CASCADE;
+CREATE TABLE IF NOT EXISTS raw_data.income_statement (
+ symbol VARCHAR(50),
+ fiscaldateending VARCHAR(50), 
+ reportedcurrency VARCHAR(10), 
+ grossprofit NUMERIC,
+ totalrevenue NUMERIC,  
+ costofrevenue NUMERIC, 
+ costofgoodsandservicessold NUMERIC, 
+ operatingincome NUMERIC,
+ sellinggeneralandadministrative NUMERIC,  
+ researchanddevelopment NUMERIC,  
+ operatingexpenses NUMERIC,
+ investmentincomenet NUMERIC,  
+ netinterestincome NUMERIC,
+ othernonoperatingincome NUMERIC,
+ incomebeforetax NUMERIC,
+ incometaxexpense NUMERIC, 
+ interestanddebtexpense NUMERIC,
+ netincomefromcontinuingoperations NUMERIC,
+ comprehensiveincomenetoftax NUMERIC,
+ ebit NUMERIC,
+ ebitda NUMERIC,  
+ netincome NUMERIC,
+ nontaxableinterestincome NUMERIC,
+ interestincome NUMERIC,
+ interestexpense NUMERIC,
+ depreciation NUMERIC,
+ noninterestincome NUMERIC,
+ depreciationandamortization NUMERIC,
+ _load_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+ PRIMARY KEY (symbol, fiscaldateending)
+);
+
+DROP TABLE IF EXISTS raw_data.balance_sheet CASCADE;
+CREATE TABLE IF NOT EXISTS raw_data.balance_sheet (
+ symbol VARCHAR(50),
+ fiscaldateending VARCHAR(50),
+ reportedcurrency VARCHAR(10),
+ totalassets NUMERIC,
+ curren_cash NUMERIC,
+ _load_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+ PRIMARY KEY (symbol, fiscaldateending)
+);
+
+DROP TABLE IF EXISTS raw_data.cash_flow CASCADE;
+CREATE TABLE IF NOT EXISTS raw_data.cash_flow (
+ symbol VARCHAR(50),
+ fiscaldateending VARCHAR(50),
+ reportedcurrency VARCHAR(10),
+ operatingcashflow NUMERIC,
+ cashflowfrom_investment NUMERIC,
+ _load_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+ PRIMARY KEY (symbol, fiscaldateending)
+);

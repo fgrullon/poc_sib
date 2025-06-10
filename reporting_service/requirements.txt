@@ -1,0 +1,10 @@
+apache-superset==2.0.0
+Werkzeug==2.0.3
+jsonschema==3.2.0
+cryptography==38.0.4
+psycopg2-binary
+wtforms-sqlalchemy
+WTForms==2.3.3
+gunicorn
+Flask==2.0.3
+Flask-Migrate==3.1.0

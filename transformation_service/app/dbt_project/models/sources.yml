@@ -1,0 +1,11 @@
+version: 2
+
+sources:
+  - name: raw_data
+    database: datagovernance_db
+    schema: raw_data
+    tables:
+      - name: company_overview
+      - name: income_statement
+      - name: balance_sheet
+      - name: cash_flow
