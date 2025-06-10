@@ -10,22 +10,22 @@ Este repositorio presenta una Prueba de Concepto (POC) para la plataforma de ana
 La POC se compone de varios servicios Docker interconectados:
 
 ### 1. `postgres_db`
-    * **Función**: Almacena todos los datos del pipeline: raw data, datos en área de staging, y las tablas de resumen. Es la unica fuente de informacion para los datos analíticos.
+    *   Almacena todos los datos del pipeline: raw data, datos en área de staging, y las tablas de resumen. Es la unica fuente de informacion para los datos analíticos.
 
 ### 2. `airflow` - `webserver` & `scheduler`
-    * **Función**: Airflow orquesta el flujo de datos completo, desde la ingesta hasta la generación de resúmenes y catalogación. Permite definir la secuencia de ejecución de cada paso (ingesta, staging, validación, transformación, visualización).
+    *   Airflow orquesta el flujo de datos completo, desde la ingesta hasta la generación de resúmenes y catalogación. Permite definir la secuencia de ejecución de cada paso (ingesta, staging, validación, transformación, visualización).
 
 ### 3. `ingestion_service` (Servicio de Ingesta)
-    * **Función**: Se encarga de la **conexión con la API de Alpha Vantage** y la extracción de los sets de datos requeridos (Company Overview, Income Statement, Balance Sheet, Cash Flow). Los datos se colocan inicialmente en el área de staging en `postgres_db`.
+    *   Se encarga de la conexión con la API de Alpha Vantage y la extracción de los sets de datos requeridos (Company Overview, Income Statement, Balance Sheet, Cash Flow). Los datos se colocan inicialmente en el área de staging en `postgres_db`.
 
 ### 4. `data_quality_service` (Servicio de Calidad de Datos)
-    * **Función**: Ejecuta **validaciones de calidad de datos** utilizando Great Expectations sobre los datos en el área de staging y/o después de las transformaciones, asegurando que los datos cumplen con las características esperadas.
+    *   Ejecuta validaciones de calidad de datos utilizando Great Expectations sobre los datos en el área de staging y/o después de las transformaciones, asegurando que los datos cumplen con las características esperadas.
 
 ### 5. `transformation_service` (Servicio de Transformación)
-    * **Función**: Utiliza dbt para **generar tablas de resúmenes anuales** y otras transformaciones necesarias a partir de los datos en `postgres_db`, aplicando reglas de negocio y optimizando la estructura para el análisis.
+    *   Utiliza dbt para generar tablas de resúmenes anuales y otras transformaciones necesarias a partir de los datos en `postgres_db`, aplicando reglas de negocio y optimizando la estructura para el análisis.
 
 ### 6. `superset_app` (Servicio de Reportes y Visualización)
-    * **Función**: Proporciona la **interfaz de usuario para la exploración y visualización de datos**, conectándose a las tablas de resumen en `postgres_db`. Permite crear visualizaciones dinámicas que proveen información de relevancia para las áreas que explotan la información.
+    *   Proporciona la interfaz de usuario para la exploración y visualización de datos, conectándose a las tablas de resumen en `postgres_db`. Permite crear visualizaciones dinámicas que proveen información de relevancia para las áreas que explotan la información.
 ---
 
 ## Estrategias 
