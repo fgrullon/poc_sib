@@ -1,0 +1,36 @@
+# Python
+.python-version
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+env/
+venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+*.sqlite3 # For local databases if any
+*.env # Local environment variables (sensitive info)
+
+# Docker
+.dockerignore
+*.dockerfile
+docker-compose.override.yml # If you use an override file for local development
+*.log
+volumes/ # Directories for Docker volumes, e.g., Airflow logs, Superset data
+
+# Great Expectations (uncommitted assets)
+data_quality_service/great_expectations/uncommitted/
+data_quality_service/great_expectations/plugins/.ipynb_checkpoints/
+
+# Operating System Files
+.DS_Store
+.vscode/ # VS Code specific settings if you don't want to share them
+.idea/ # IntelliJ/PyCharm specific settings
+
+# General
+.cache/
+.DS_Store
+Thumbs.db
